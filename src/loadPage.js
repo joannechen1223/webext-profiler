@@ -1,8 +1,8 @@
 import { getBrowser } from "./helper/puppeteer";
 import { bytesToMB, sleep } from "./helper/utils.js";
 
-const loadPage = async (url) => {
-  const browser = await getBrowser();
+const loadPage = async (url, options) => {
+  const browser = await getBrowser(options);
 
   await sleep(5000);
 
@@ -27,6 +27,7 @@ const loadPage = async (url) => {
   const performanceTiming = JSON.parse(performanceTimingJson);
 
   await browser.close();
+
   return {
     taskDuration: metrics.TaskDuration * 1000,
     layoutDuration: metrics.LayoutDuration * 1000,
@@ -40,8 +41,20 @@ const loadPage = async (url) => {
 
 const execute = async ({ url, testTitle }) => {
   console.log(`Start ${testTitle} test`);
-  const result = await loadPage(url);
-  console.table(result);
+  const noExtMetrics = [];
+  const extMetrics = [];
+  const extNames = process.env.EXT_NAMES.split(",");
+  console.log(extNames);
+
+  // no extension
+  noExtMetrics.push(await loadPage(url));
+
+  // with extension
+  for (const extName of extNames) {
+    extMetrics.push(await loadPage(url, { extName }));
+  }
+
+  console.table([...noExtMetrics, ...extMetrics]);
   console.log(`End ${testTitle} test`);
 };
 
