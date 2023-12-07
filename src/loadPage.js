@@ -1,5 +1,5 @@
 import { getBrowser } from "./helper/puppeteer";
-import { bytesToMB, sleep } from "./helper/utils.js";
+import { bytesToMB, objAverage, sleep } from "./helper/utils.js";
 
 const loadPage = async (url, options) => {
   const browser = await getBrowser(options);
@@ -43,15 +43,23 @@ const execute = async ({ url, testTitle }) => {
   console.log(`Start ${testTitle} test`);
   const noExtMetrics = [];
   const extMetrics = [];
+  const iterations = process.env.ITERATIONS;
   const extNames = process.env.EXT_NAMES.split(",");
-  console.log(extNames);
+  let metrics = [];
 
   // no extension
-  noExtMetrics.push(await loadPage(url));
+  for (let i = 0; i < iterations; i++) {
+    metrics.push(await loadPage(url));
+  }
+  noExtMetrics.push(objAverage(metrics));
 
   // with extension
   for (const extName of extNames) {
-    extMetrics.push(await loadPage(url, { extName }));
+    metrics = [];
+    for (let i = 0; i < iterations; i++) {
+      metrics.push(await loadPage(url, { extName }));
+    }
+    extMetrics.push(objAverage(metrics));
   }
 
   console.table([...noExtMetrics, ...extMetrics]);
