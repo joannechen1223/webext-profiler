@@ -1,3 +1,5 @@
+import cliProgress from "cli-progress";
+
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export const bytesToMB = (bytes) => bytes / 1000000;
@@ -23,3 +25,12 @@ export const objAverage = (objList) => {
 
   return avgObj;
 };
+
+export const getProgressBar = () =>
+  new cliProgress.SingleBar(
+    {
+      format: "[{bar}] {percentage}% | ETA: {eta}s | {value}/{total}",
+      clearOnComplete: true,
+    },
+    cliProgress.Presets.legacy
+  );
