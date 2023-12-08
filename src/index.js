@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import loadPage from "./loadPage";
+import { generateReport } from "./report/generator";
 
 const loadExamplePage = () =>
   loadPage({
@@ -14,6 +15,8 @@ const execute = async () => {
 
   const reportContents = [];
   for (const test of tests) reportContents.push(await test());
+
+  generateReport(reportContents);
 };
 
 execute();

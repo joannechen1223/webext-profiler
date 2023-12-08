@@ -46,10 +46,9 @@ const loadPage = async (url, options) => {
 
 const execute = async ({ url, testTitle }) => {
   console.log(`Start ${testTitle} test`);
-  const noExtMetrics = [];
-  const extMetrics = [];
   const iterations = process.env.ITERATIONS;
   const extNames = process.env.EXT_NAMES.split(",");
+  const results = {};
 
   const progressBar = await getProgressBar();
   const total = (extNames.length + 1) * iterations;
@@ -62,7 +61,7 @@ const execute = async ({ url, testTitle }) => {
     metrics.push(await loadPage(url));
     progressBar.update(++count);
   }
-  noExtMetrics.push(objAverage(metrics));
+  results["no ext"] = objAverage(metrics);
 
   // with extension
   for (const extName of extNames) {
@@ -71,13 +70,23 @@ const execute = async ({ url, testTitle }) => {
       metrics.push(await loadPage(url, { extName }));
       progressBar.update(++count);
     }
-    extMetrics.push(objAverage(metrics));
+    results[extName] = objAverage(metrics);
   }
 
   progressBar.stop();
 
-  console.table([...noExtMetrics, ...extMetrics]);
+  console.table(results);
   console.log(`End ${testTitle} test`);
+  return {
+    title: testTitle,
+    meta: {
+      iteration: process.env.ITERATIONS,
+      extNames: extNames.join(", "),
+      url,
+    },
+    results,
+    base: "no ext",
+  };
 };
 
 export default execute;
