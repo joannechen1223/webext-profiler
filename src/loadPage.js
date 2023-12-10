@@ -9,8 +9,6 @@ import {
 } from "./helper/utils.js";
 import { baseExtChartSettings } from "./report/chart";
 
-const BASE_EXT = process.env.BASE_EXT || "no ext";
-
 const loadPage = async (url, options) => {
   const browser = await getBrowser(options);
 
@@ -49,7 +47,7 @@ const loadPage = async (url, options) => {
   };
 };
 
-export const generateCharts = (results) => {
+export const generateCharts = (results, baseExt) => {
   const extNames = Object.keys(results);
   const data = {
     taskDuration: [],
@@ -61,19 +59,19 @@ export const generateCharts = (results) => {
     data.taskDuration.push({
       x: extName,
       value: results[extName].taskDuration,
-      ...(extName == BASE_EXT && baseExtChartSettings),
+      ...(extName == baseExt && baseExtChartSettings),
     });
 
     data.pageLoadDuration.push({
       x: extName,
       value: results[extName].pageLoadDuration,
-      ...(extName == BASE_EXT && baseExtChartSettings),
+      ...(extName == baseExt && baseExtChartSettings),
     });
 
     data.jsHeapUsedSize.push({
       x: extName,
       value: results[extName].jsHeapUsedSize,
-      ...(extName == BASE_EXT && baseExtChartSettings),
+      ...(extName == baseExt && baseExtChartSettings),
     });
   });
 
@@ -104,7 +102,9 @@ export const generateCharts = (results) => {
 
 const execute = async ({ url, testTitle }) => {
   console.log(`Start ${testTitle} test`);
-  const iterations = process.env.ITERATIONS;
+  const iterations = process.env.ITERATIONS || 10;
+  const baseExt = process.env.BASE_EXT || "no ext";
+
   const extNames = process.env.EXT_NAMES.split(",");
   const results = {};
 
@@ -138,13 +138,13 @@ const execute = async ({ url, testTitle }) => {
   return {
     title: testTitle,
     meta: {
-      iteration: process.env.ITERATIONS,
+      iteration: iterations,
       extNames: extNames.join(", "),
       url,
     },
     results,
-    base: BASE_EXT,
-    charts: generateCharts(results),
+    base: baseExt,
+    charts: generateCharts(results, baseExt),
   };
 };
 
