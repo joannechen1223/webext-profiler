@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 import { getBrowser } from "./helper/puppeteer";
 import {
   bytesToMB,
@@ -5,6 +7,9 @@ import {
   objAverage,
   sleep,
 } from "./helper/utils.js";
+import { baseExtChartSettings } from "./report/chart";
+
+const BASE_EXT = process.env.BASE_EXT || "no ext";
 
 const loadPage = async (url, options) => {
   const browser = await getBrowser(options);
@@ -42,6 +47,59 @@ const loadPage = async (url, options) => {
     subResourcesDuration: performanceTiming.subResourcesDuration,
     jsHeapUsedSize: bytesToMB(metrics.JSHeapUsedSize),
   };
+};
+
+export const generateCharts = (results) => {
+  const extNames = Object.keys(results);
+  const data = {
+    taskDuration: [],
+    pageLoadDuration: [],
+    jsHeapUsedSize: [],
+  };
+
+  extNames.forEach((extName) => {
+    data.taskDuration.push({
+      x: extName,
+      value: results[extName].taskDuration,
+      ...(extName == BASE_EXT && baseExtChartSettings),
+    });
+
+    data.pageLoadDuration.push({
+      x: extName,
+      value: results[extName].pageLoadDuration,
+      ...(extName == BASE_EXT && baseExtChartSettings),
+    });
+
+    data.jsHeapUsedSize.push({
+      x: extName,
+      value: results[extName].jsHeapUsedSize,
+      ...(extName == BASE_EXT && baseExtChartSettings),
+    });
+  });
+
+  const uniqueId = uuid().substring(0, 8);
+  const charts = [
+    {
+      data: data.taskDuration,
+      title: "Task Duration(ms)",
+      containerId: `${uniqueId}-load-page-task-duration-container`,
+      axis: ["Extension", "Time (ms)"],
+    },
+    {
+      data: data.pageLoadDuration,
+      title: "Page Load Duration(ms)",
+      containerId: `${uniqueId}-load-page-page-load-duration-container`,
+      axis: ["Extension", "Time (ms)"],
+    },
+    {
+      data: data.jsHeapUsedSize,
+      title: "JS Heap Used Size(MB)",
+      containerId: `${uniqueId}-load-page-js-heap-used-size-container`,
+      axis: ["Extension", "Size (MB)"],
+    },
+  ];
+
+  return charts;
 };
 
 const execute = async ({ url, testTitle }) => {
@@ -85,7 +143,8 @@ const execute = async ({ url, testTitle }) => {
       url,
     },
     results,
-    base: "no ext",
+    base: BASE_EXT,
+    charts: generateCharts(results),
   };
 };
 
