@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import fs from "fs";
 
+import { generateChartHtml, generateChartScript } from "./chart";
 import { metrics } from "../helper/metrics";
 import { toISOLocal, yyyyMMddHHmm } from "../helper/datetime";
 import { internalCss } from "./style";
@@ -26,8 +27,9 @@ export const generateReport = (reportContents) => {
   `;
 
   let contentHtml = "";
+  const allCharts = [];
   reportContents.map((content, idx) => {
-    const { title, meta, results, base } = content;
+    const { title, meta, results, base, charts } = content;
     const listElements = {
       ...meta,
       ["percentage highlight threshold"]: `+${PERCENTAGE_THRESHOLD}%`,
@@ -37,8 +39,11 @@ export const generateReport = (reportContents) => {
         <h2>Test ${idx + 1}: ${title}</h2>
         ${objToUlElement(listElements)}
         ${resultsToHtmlTable(results, base)}
+        ${charts && generateChartHtml(charts)}
       </div>
     `;
+
+    allCharts.push(...charts);
   });
 
   const header = process.env.HEADER
@@ -49,12 +54,14 @@ export const generateReport = (reportContents) => {
   const html = `
     <html>
       <head>
+        <script src="https://cdn.anychart.com/releases/8.0.0/js/anychart-base.min.js"></script>
         <h1>${header}</h1>
         <div>${"Timestamp: " + toISOLocal(d)}</div>
         <style>${internalCss}</style>
       </head>
       <body>
         ${metricsHtml}
+        ${generateChartScript(allCharts)}
         ${contentHtml}
       </body>
     </html>
