@@ -101,7 +101,7 @@ export const resultsToHtmlTable = (obj, base) => {
     const rowDisplay = row === base ? `${row} (base)` : row;
     table += `<td rowspan="2">${rowDisplay}</td>`;
 
-    cols.forEach((col) => (table += `<td>${obj[row][col].toFixed(4)}</td>`));
+    cols.forEach((col) => (table += `<td>${obj[row][col]}</td>`));
     table += `</tr>`;
 
     if (!base) return;
