@@ -1,17 +1,16 @@
-import * as dotenv from "dotenv";
+import fs from 'fs';
+
+import * as dotenv from 'dotenv';
 dotenv.config();
 
-import loadPage from "./loadPage";
-import { generateReport } from "./report/generator";
+import loadPage from './loadPage';
+import { generateReport } from './report/generator';
 
-const loadExamplePage = () =>
-  loadPage({
-    testTitle: "Load Example Page",
-    url: "https://example.com/",
-  });
+const TEST_PAGES_PATH = process.env.TEST_PAGES_PATH || 'tests/example.json';
 
 const execute = async () => {
-  const tests = [loadExamplePage];
+  const testPages = JSON.parse(fs.readFileSync(TEST_PAGES_PATH, 'utf8'));
+  const tests = testPages.map((testPage) => () => loadPage(testPage));
 
   const reportContents = [];
   for (const test of tests) reportContents.push(await test());

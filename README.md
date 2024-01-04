@@ -24,6 +24,7 @@ Webext-profiler created the automated test process with [Puppeteer](https://pptr
 - Test your own extension
   - Move your extension directory under `extensions`.
 - Test other extensions locally installed in Chrome
+
   - Find your Chrome local profile directory. Open `chrome://version/` and find the `Profile Path:` field.
 
     <img width="600" alt="Screenshot 2023-12-10 at 3 39 26 PM" src="https://github.com/joannechen1223/webext-profiler/assets/22555930/62a62f6a-3890-4025-a239-8ca122a1d98d">
@@ -38,15 +39,32 @@ Webext-profiler created the automated test process with [Puppeteer](https://pptr
 2. Prepare **Environment Variables**
    The following variables are required when running performance test:
 
-| Variable  | Description                                                                                                 | Example Value                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| EXT_NAMES | Extensions you want to test. Split by comma `,`                                                             | ex: `Grammarly` or `Grammarly,Rakuten_Cashback,PayPal_Honey` or `v7.1.0,v8.0.0` |
-| BASE_EXT  | Which extensiojn you want to set its results as baseline to compare with other results, default to `no ext` | `Grammarly`                                                                     |
-| ITERATIONS | How many times each test case will run, default to `10`                                                     | `10`                                                                            |
-| HEADER    | Title performance report. Usually set to the target extension or version you would like to test             | `Grammarly Extension Performance Test`                                          |
-| FILENAME  | Filename prefix of the report. Usually set to the target extension or version you would like to test        | `grammarly-extension-performance-report`                                        |
+| Variable        | Description                                                                                                 | Example Value                                                                   |
+| --------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| EXT_NAMES       | Extensions you want to test. Split by comma `,`                                                             | ex: `Grammarly` or `Grammarly,Rakuten_Cashback,PayPal_Honey` or `v7.1.0,v8.0.0` |
+| BASE_EXT        | Which extensiojn you want to set its results as baseline to compare with other results, default to `no ext` | `Grammarly`                                                                     |
+| ITERATIONS      | How many times each test case will run, default to `10`                                                     | `10`                                                                            |
+| HEADER          | Title performance report. Usually set to the target extension or version you would like to test             | `Grammarly Extension Performance Test`                                          |
+| FILENAME        | Filename prefix of the report. Usually set to the target extension or version you would like to test        | `grammarly-extension-performance-report`                                        |
+| TEST_PAGES_PATH | The file path to your customized test cases JSON file, default to `tests/example.json`                      | `tests/mytest.json`                                                             |
 
 > You can follow `.env.sample` to create your own `.env` file, and fill in the correct value of the variables.
+
+2. Prepare **Test Cases**
+   List out the target pages' url and test name in JSON format and put it under `tests` directory.
+
+```json
+[
+  {
+    "testTitle": "Load Example Page",
+    "url": "https://example.com/"
+  },
+  {
+    "testTitle": "Load Google Translate Page",
+    "url": "https://translate.google.co.in/"
+  }
+]
+```
 
 #### Run the test
 
