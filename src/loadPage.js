@@ -1,32 +1,32 @@
-import { v4 as uuid } from "uuid";
+import { v4 as uuid } from 'uuid';
 
-import { getBrowser } from "./helper/puppeteer";
+import { getBrowser } from './helper/puppeteer';
 import {
   bytesToMB,
   getProgressBar,
   objAverage,
   sleep,
-} from "./helper/utils.js";
-import { baseExtChartSettings } from "./report/chart";
+} from './helper/utils.js';
+import { baseExtChartSettings } from './report/chart';
 
 const loadPage = async (url, options) => {
   const browser = await getBrowser(options);
 
-  await sleep(5000);
+  await sleep(3000);
 
   // prewarm sub resource cache
   const tmp = await browser.newPage();
-  await tmp.goto(url, { waitUntil: "networkidle0", timeout: 0 });
+  await tmp.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
   await tmp.close();
 
   // testing target page
   const page = await browser.newPage();
   await page.bringToFront();
-  await page.goto(url, { waitUntil: "networkidle0", timeout: 0 });
+  await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
 
   const metrics = await page.metrics();
   const performanceTimingJson = await page.evaluate(() => {
-    const perf = window.performance.getEntriesByType("navigation")[0];
+    const perf = window.performance.getEntriesByType('navigation')[0];
     return JSON.stringify({
       pageLoadDuration: perf.duration,
       subResourcesDuration: perf.loadEventEnd - perf.domContentLoadedEventEnd,
@@ -79,21 +79,21 @@ export const generateCharts = (results, baseExt) => {
   const charts = [
     {
       data: data.taskDuration,
-      title: "Task Duration(ms)",
+      title: 'Task Duration(ms)',
       containerId: `${uniqueId}-load-page-task-duration-container`,
-      axis: ["Extension", "Time (ms)"],
+      axis: ['Extension', 'Time (ms)'],
     },
     {
       data: data.pageLoadDuration,
-      title: "Page Load Duration(ms)",
+      title: 'Page Load Duration(ms)',
       containerId: `${uniqueId}-load-page-page-load-duration-container`,
-      axis: ["Extension", "Time (ms)"],
+      axis: ['Extension', 'Time (ms)'],
     },
     {
       data: data.jsHeapUsedSize,
-      title: "JS Heap Used Size(MB)",
+      title: 'JS Heap Used Size(MB)',
       containerId: `${uniqueId}-load-page-js-heap-used-size-container`,
-      axis: ["Extension", "Size (MB)"],
+      axis: ['Extension', 'Size (MB)'],
     },
   ];
 
@@ -103,9 +103,9 @@ export const generateCharts = (results, baseExt) => {
 const execute = async ({ url, testTitle }) => {
   console.log(`Start ${testTitle} test`);
   const iterations = process.env.ITERATIONS || 10;
-  const baseExt = process.env.BASE_EXT || "no ext";
+  const baseExt = process.env.BASE_EXT || 'no ext';
 
-  const extNames = process.env.EXT_NAMES.split(",");
+  const extNames = process.env.EXT_NAMES.split(',');
   const results = {};
 
   const progressBar = await getProgressBar();
@@ -119,7 +119,7 @@ const execute = async ({ url, testTitle }) => {
     metrics.push(await loadPage(url));
     progressBar.update(++count);
   }
-  results["no ext"] = objAverage(metrics);
+  results['no ext'] = objAverage(metrics);
 
   // with extension
   for (const extName of extNames) {
@@ -139,7 +139,7 @@ const execute = async ({ url, testTitle }) => {
     title: testTitle,
     meta: {
       iteration: iterations,
-      extNames: extNames.join(", "),
+      extNames: extNames.join(', '),
       url,
     },
     results,
